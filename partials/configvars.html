@@ -1,0 +1,67 @@
+<div class="container">
+  <h3>
+    <a href="#/">Applications</a>
+    <span class="sep">/</span>
+    <span class="app"><a href="#/{{app.shortname}}">{{app.prettyname}}</a></span>
+    <span class="sep">/</span>
+    <span class="env">{{env}}</span>
+  </h3>
+
+  <div>
+    <h2>Config vars</h2>
+
+    <div class="spinner" ng-show="loading">Loading &hellip;</div>
+    
+    <div ng-hide="loading" class="env">
+      <div ng-repeat="v in vars" class="row env-var">
+        <div class="config-var-name col-md-5">
+          <input type="text" value="{{v.name}}" disabled="disabled" class="form-control">
+        </div>
+        <div class="config-var-value col-md-5">
+          <input type="text" ng-model="v.val" ng-disabled="!vm.isEditing(v)" class="form-control">
+        </div>
+        <div class="config-var-actions col-md-2">
+          <div class="edit-var pull-left">
+            <button class="btn btn-sm btn-default" title="Edit" ng-hide="vm.isEditing(v)" ng-click="vm.startEditing(v)">
+              <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+            </button>
+            <button class="btn btn-sm btn-primary" title="Cancel" ng-show="vm.isEditing(v)" ng-click="vm.cancelEditing(v)">
+              Cancel
+            </button>
+            <button class="btn btn-sm btn-success" title="Update" ng-show="vm.isEditing(v)" ng-click="vm.update(v)">
+              Update
+            </button>
+          </div>
+
+          <div class="delete-var">
+            <button class="delete btn btn-sm btn-default" title="Delete?" ng-hide="v.delete" ng-click="v.delete = true">
+              <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+            </button>
+            <button class="confirm-delete btn btn-sm btn-primary" ng-show="v.delete" ng-click="v.delete = false">
+              Cancel
+            </button>
+            <button class="cancel-delete btn btn-sm btn-danger" ng-show="v.delete" ng-click="vm.delete(v)">
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="new-config-var row">
+        <div class="col-md-5">
+          <input type="text" placeholder="NAME" class="form-control"
+                 ng-model="newvar.name"
+                 ng-pattern="/^[a-zA-Z_][a-zA-Z0-9_]*$/"
+                 required>
+        </div>
+        <div class="col-md-5">
+          <input type="text" placeholder="VALUE" class="form-control"
+                 ng-model="newvar.val">
+        </div>
+        <div class="col-md-2">
+          <button ng-disabled="!newvar.name" ng-click="vm.add()" class="btn btn-default">Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+<div class="container">
+  <h3>
+    <span class="app">
+      <a href="#/">Applications</a>
+      <span class="sep">/</span>
+      {{app.prettyname}}
+  </h3>
+
+  <h2>Environments</h2>
+  <ul>
+    <li ng-repeat="env in envs">
+      <a href="#/{{app.shortname}}/{{env}}">{{env}}</a>
+    </li>
+  </ul>
+</div>

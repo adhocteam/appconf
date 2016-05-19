@@ -1,0 +1,19 @@
+.edit-var {
+    padding-right: 5px;
+}
+
+.env-var {
+    margin-bottom: 1em;
+}
+
+/*
+.env-var.ng-enter {
+    -webkit-transition: 0.5s linear all;
+    transition: 0.5s linear all;
+    opacity: 0;
+}
+
+.env-var.ng-enter.ng-enter-active {
+    opacity: 1;
+}
+*/
