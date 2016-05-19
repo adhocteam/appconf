@@ -120,9 +120,13 @@ func listVars(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := make([]cfgvar, 0, len(resp.Contents))
+	var vars []cfgvar
 
 	for _, obj := range resp.Contents {
+		if strings.HasSuffix(*obj.Key, "/") {
+			log.Printf("skipping directory %q", *obj.Key)
+			continue
+		}
 		varObj, err := getS3Object(svc, *obj.Key)
 		if err != nil {
 			log.Printf("getting object %s: %v", *obj.Key, err)
