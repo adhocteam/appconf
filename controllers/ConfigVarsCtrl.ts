@@ -89,6 +89,7 @@ module settings {
         }
 
         cancelEditing(v: Var) {
+            v.val = v.original;
             delete v.original;
         }
 
