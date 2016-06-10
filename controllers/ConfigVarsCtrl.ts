@@ -29,7 +29,7 @@ module settings {
                         return;
                     }
 
-                    $scope.vars = vars;
+                    $scope.vars = vars || [];
                 });
             });
 

@@ -120,7 +120,7 @@ func listVars(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var vars []cfgvar
+	vars := make([]cfgvar, 0, len(resp.Contents))
 
 	for _, obj := range resp.Contents {
 		if strings.HasSuffix(*obj.Key, "/") {
