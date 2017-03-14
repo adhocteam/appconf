@@ -32,9 +32,11 @@ var (
 	marketplaceAPI = app{"marketplace-api", "Marketplace API"}
 	windowshop     = app{"windowshop", "WindowShop"}
 	plancompare    = app{"plancompare", "Plan Compare"}
+	haproxy        = app{"haproxy", "HAProxy"}
+	petapi         = app{"petapi", "PET API"}
 )
 
-var apps = []app{marketplaceAPI, windowshop, plancompare}
+var apps = []app{marketplaceAPI, windowshop, plancompare, haproxy, petapi}
 
 func appByName(name string) app {
 	switch name {
@@ -44,6 +46,10 @@ func appByName(name string) app {
 		return windowshop
 	case "plancompare":
 		return plancompare
+	case "haproxy":
+		return haproxy
+	case "petapi":
+		return petapi
 	default:
 		return app{}
 	}
