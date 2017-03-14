@@ -27,7 +27,7 @@ into environment variables of the application. The mechanism by which that
 happens is intended to be that the instance (via a user-data script) or the app
 itself pulls down the conf vars from S3 at boot-time. Since these apps are
 managed by `runit`, they can use
-`[chpst](http://smarden.org/runit/chpst.8.html)'s` env dir facility to create
+[`chpst`](http://smarden.org/runit/chpst.8.html)'s env dir facility to create
 the environment variables from these files. This mechanism is outside this app
 -- the app merely (at the moment) manages the writing and updating of conf vars.
 
