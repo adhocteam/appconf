@@ -5,19 +5,38 @@ Application settings configurator.
 
 [https://appconf.adhocteam.us/](https://appconf.adhocteam.us/)
 
-Configures the following applications:
+This requires a S3 bucket to store the configuration files in, and to run as a
+AWS IAM user with permission to list, get, put, and delete objects on that bucket.
 
- * Marketplace API
- * Window Shopping
- * Plan Compare 2.0
+The S3 bucket structure is:
 
-Environments supported:
+```
+/
+  application1/
+    dev/
+      VAR1
+      VAR2
+      ...
+    test/
+      VAR1
+      VAR2
+      ...
+    ...
+  application2/
+    dev/
+      VAR1
+      VAR2
+      ...
+    test/
+      VAR1
+      VAR2
+      ...
+    ...
+  ...
+```
 
- * dev
- * test
- * imp1a
- * imp1b
- * prod
+You must provide an inventory file that lists each environment and application you'd like
+to configure. See [inventory.json.example](inventory.json.example) for a sample file.
 
 ### Theory of operation
 
@@ -41,6 +60,7 @@ Runtime dependencies
 --------------------
 
 * **AWS credentials** -- add them to the shell environment
+* inventory.json file -- see [inventory.json.example](inventory.json.example) for a skeleton file
 
 Installation
 ------------
@@ -53,9 +73,10 @@ Usage
 -----
 
 ``` shell
-$ cd $GOPATH/github.com/adhocteam.us/appconf
-$ # ensure AWS credentials are set in the environment
-$ appconf
+$ cd $GOPATH/github.com/adhocteam.us/appconf -inv /path/to/inventory.json -bucket your-bucket-name -l :8080
+$ go install
+$ # ensure AWS credentials are set in the environment or $HOME/.aws/credentials
+$ $GOBIN/appconf
 $ open http://localhost:8080/
 ```
 

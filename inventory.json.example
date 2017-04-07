@@ -1,0 +1,9 @@
+{
+  "envs": ["dev", "test", "prod"],
+  "apps": {
+    "example": {
+      "shortname": "example",
+      "prettyname": "Example Application"
+    }
+  }
+}

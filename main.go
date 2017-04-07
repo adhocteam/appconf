@@ -14,58 +14,56 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+
 	"github.com/bmizerany/pat"
 	"github.com/gorilla/handlers"
 )
 
-var (
-	region = "us-east-1"
-	bucket = "pet-config-vars"
-)
+// for CLI flags
+var region, bucket, listenAddr, invPath string
+var awsSess *session.Session
+
+type Inventory struct {
+	Applications map[string]app `json:"apps"`
+	Environments []env          `json:"envs"`
+}
+
+var inventory Inventory
 
 type app struct {
 	Short  string `json:"shortname"`  // short name, like "marketplace-api"
 	Pretty string `json:"prettyname"` // pretty-print name, like "Marketplace API"
 }
 
-var (
-	marketplaceAPI = app{"marketplace-api", "Marketplace API"}
-	windowshop     = app{"windowshop", "WindowShop"}
-	plancompare    = app{"plancompare", "Plan Compare"}
-	haproxy        = app{"haproxy", "HAProxy"}
-	petapi         = app{"petapi", "PET API"}
-)
+// var (
+//   marketplaceAPI = app{"marketplace-api", "Marketplace API"}
+//   windowshop     = app{"windowshop", "WindowShop"}
+//   plancompare    = app{"plancompare", "Plan Compare"}
+//   haproxy        = app{"haproxy", "HAProxy"}
+//   petapi         = app{"petapi", "PET API"}
+// )
 
-var apps = []app{marketplaceAPI, windowshop, plancompare, haproxy, petapi}
+// var apps = []app{marketplaceAPI, windowshop, plancompare, haproxy, petapi}
 
-func appByName(name string) app {
-	switch name {
-	case "marketplace-api":
-		return marketplaceAPI
-	case "windowshop":
-		return windowshop
-	case "plancompare":
-		return plancompare
-	case "haproxy":
-		return haproxy
-	case "petapi":
-		return petapi
-	default:
-		return app{}
-	}
+func (i Inventory) appByName(name string) app {
+	return i.Applications[name]
+}
+
+func (i Inventory) envs() []env {
+	return i.Environments
 }
 
 type env string
 
-var (
-	prod  = env("prod")
-	imp1b = env("imp1b")
-	imp1a = env("imp1a")
-	test  = env("test")
-	dev   = env("dev")
-)
-
-var envs = []env{prod, imp1b, imp1a, test, dev}
+// var (
+//   prod  = env("prod")
+//   imp1b = env("imp1b")
+//   imp1a = env("imp1a")
+//   test  = env("test")
+//   dev   = env("dev")
+// )
+//
+// var envs = []env{prod, imp1b, imp1a, test, dev}
 
 type cfgvar struct {
 	Name string `json:"name"`
@@ -73,6 +71,14 @@ type cfgvar struct {
 }
 
 func listApps(w http.ResponseWriter, r *http.Request) {
+	apps := []app{}
+
+	for _, a := range inventory.Applications {
+		apps = append(apps, a)
+	}
+
+	log.Println(inventory.Applications)
+
 	if err := json.NewEncoder(w).Encode(struct {
 		Apps []app `json:"apps"`
 	}{
@@ -88,8 +94,8 @@ func listEnvs(w http.ResponseWriter, r *http.Request) {
 		App  app   `json:"app"`
 		Envs []env `json:"envs"`
 	}{
-		appByName(r.FormValue(":app")),
-		envs,
+		inventory.appByName(r.FormValue(":app")),
+		inventory.envs(),
 	}); err != nil {
 		log.Printf("encoding JSON: %v", err)
 		http.Error(w, http.StatusText(500), 500)
@@ -109,10 +115,10 @@ func varNameFromS3Key(key string) string {
 }
 
 func listVars(w http.ResponseWriter, r *http.Request) {
-	a := appByName(r.FormValue(":app"))
+	a := inventory.appByName(r.FormValue(":app"))
 	e := env(r.FormValue(":env"))
 
-	svc := s3.New(session.New(), &aws.Config{Region: aws.String(region)})
+	svc := s3.New(awsSess)
 	prefix := a.Short + "/" + string(e)
 
 	params := &s3.ListObjectsInput{
@@ -171,10 +177,10 @@ func listVars(w http.ResponseWriter, r *http.Request) {
 var envVarNameRE = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z_0-9]*`)
 
 func createVar(w http.ResponseWriter, r *http.Request) {
-	a := appByName(r.FormValue(":app"))
+	a := inventory.appByName(r.FormValue(":app"))
 	e := env(r.FormValue(":env"))
 
-	svc := s3.New(session.New(), &aws.Config{Region: aws.String(region)})
+	svc := s3.New(awsSess)
 	prefix := a.Short + "/" + string(e)
 
 	if !envVarNameRE.MatchString(r.FormValue("name")) {
@@ -205,10 +211,10 @@ func createVar(w http.ResponseWriter, r *http.Request) {
 }
 
 func updateVar(w http.ResponseWriter, r *http.Request) {
-	a := appByName(r.FormValue(":app"))
+	a := inventory.appByName(r.FormValue(":app"))
 	e := env(r.FormValue(":env"))
 
-	svc := s3.New(session.New(), &aws.Config{Region: aws.String(region)})
+	svc := s3.New(awsSess)
 	prefix := a.Short + "/" + string(e)
 
 	if !envVarNameRE.MatchString(r.FormValue(":name")) {
@@ -239,10 +245,10 @@ func updateVar(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteVar(w http.ResponseWriter, r *http.Request) {
-	a := appByName(r.FormValue(":app"))
+	a := inventory.appByName(r.FormValue(":app"))
 	e := env(r.FormValue(":env"))
 
-	svc := s3.New(session.New(), &aws.Config{Region: aws.String(region)})
+	svc := s3.New(awsSess)
 	prefix := a.Short + "/" + string(e)
 
 	if !envVarNameRE.MatchString(r.FormValue(":name")) {
@@ -271,10 +277,32 @@ func deleteVar(w http.ResponseWriter, r *http.Request) {
 	log.Printf("deleted env var %q (key: %s), version: %v", v.Name, key, resp.VersionId)
 }
 
-func main() {
-	listenAddr := flag.String("l", ":8080", "address to listen on")
+func init() {
+	flag.StringVar(&invPath, "inv", "inventory.json", "path to inventory file")
+	flag.StringVar(&bucket, "bucket", "", "S3 bucket")
+	flag.StringVar(&listenAddr, "l", ":8080", "address to listen on")
+}
 
+func main() {
 	flag.Parse()
+
+	awsSess = session.Must(session.NewSessionWithOptions(session.Options{
+		Config:            aws.Config{Region: aws.String(os.Getenv("AWS_DEFAULT_REGION"))},
+		Profile:           os.Getenv("AWS_PROFILE"),
+		SharedConfigState: session.SharedConfigEnable,
+	}))
+
+	f, err := os.Open(invPath)
+	defer f.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	if err := json.NewDecoder(f).Decode(&inventory); err != nil {
+		log.Fatal("json err: ", err)
+	}
+
+	log.Println(inventory)
 
 	m := pat.New()
 	m.Get("/a/apps", http.HandlerFunc(listApps))
@@ -287,6 +315,6 @@ func main() {
 	http.Handle("/a/", m)
 	http.Handle("/", http.FileServer(http.Dir(".")))
 
-	log.Printf("listening on %s", *listenAddr)
-	log.Fatal(http.ListenAndServe(*listenAddr, handlers.CombinedLoggingHandler(os.Stderr, http.DefaultServeMux)))
+	log.Printf("listening on %s", listenAddr)
+	log.Fatal(http.ListenAndServe(listenAddr, handlers.CombinedLoggingHandler(os.Stderr, http.DefaultServeMux)))
 }
