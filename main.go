@@ -35,16 +35,6 @@ type app struct {
 	Pretty string `json:"prettyname"` // pretty-print name, like "Marketplace API"
 }
 
-// var (
-//   marketplaceAPI = app{"marketplace-api", "Marketplace API"}
-//   windowshop     = app{"windowshop", "WindowShop"}
-//   plancompare    = app{"plancompare", "Plan Compare"}
-//   haproxy        = app{"haproxy", "HAProxy"}
-//   petapi         = app{"petapi", "PET API"}
-// )
-
-// var apps = []app{marketplaceAPI, windowshop, plancompare, haproxy, petapi}
-
 func (i Inventory) appByName(name string) app {
 	return i.Applications[name]
 }
@@ -54,16 +44,6 @@ func (i Inventory) envs() []env {
 }
 
 type env string
-
-// var (
-//   prod  = env("prod")
-//   imp1b = env("imp1b")
-//   imp1a = env("imp1a")
-//   test  = env("test")
-//   dev   = env("dev")
-// )
-//
-// var envs = []env{prod, imp1b, imp1a, test, dev}
 
 type cfgvar struct {
 	Name string `json:"name"`
