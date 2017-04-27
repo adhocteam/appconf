@@ -23,6 +23,9 @@ import (
 var region, bucket, listenAddr, invPath string
 var awsSess *session.Session
 
+var encType string = "aws:kms"
+var kmsKeyId string = os.Getenv("AWS_KMS_KEY_ID")
+
 type Inventory struct {
 	Applications map[string]app `json:"apps"`
 }
@@ -174,9 +177,11 @@ func createVar(w http.ResponseWriter, r *http.Request) {
 	key := prefix + "/" + v.Name
 
 	params := &s3.PutObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-		Body:   strings.NewReader(v.Val),
+		Bucket:               aws.String(bucket),
+		Key:                  aws.String(key),
+		Body:                 strings.NewReader(v.Val),
+		ServerSideEncryption: &encType,
+		SSEKMSKeyId:          &kmsKeyId,
 	}
 	resp, err := svc.PutObject(params)
 	if err != nil {
@@ -210,9 +215,11 @@ func updateVar(w http.ResponseWriter, r *http.Request) {
 	key := prefix + "/" + v.Name
 
 	params := &s3.PutObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-		Body:   strings.NewReader(v.Val),
+		Bucket:               aws.String(bucket),
+		Key:                  aws.String(key),
+		Body:                 strings.NewReader(v.Val),
+		ServerSideEncryption: &encType,
+		SSEKMSKeyId:          &kmsKeyId,
 	}
 	resp, err := svc.PutObject(params)
 	if err != nil {
