@@ -99,7 +99,7 @@ func listVars(w http.ResponseWriter, r *http.Request) {
 	e := env(r.FormValue(":env"))
 
 	svc := s3.New(awsSess)
-	prefix := a.Short + "/" + string(e)
+	prefix := a.Short + "/" + string(e) + "/"
 
 	params := &s3.ListObjectsInput{
 		Bucket: aws.String(bucket),
