@@ -66,14 +66,14 @@ Installation
 ------------
 
 ``` shell
-$ go get github.com/adhocteam.us/appconf
+$ go get github.com/adhocteam/appconf
 ```
 
 Usage
 -----
 
 ``` shell
-$ cd $GOPATH/github.com/adhocteam.us/appconf -inv /path/to/inventory.json -bucket your-bucket-name -l :8080
+$ cd $GOPATH/github.com/adhocteam/appconf -inv /path/to/inventory.json -bucket your-bucket-name -l :8080
 $ go install
 $ # ensure AWS credentials are set in the environment or $HOME/.aws/credentials
 $ $GOBIN/appconf
@@ -84,7 +84,7 @@ Building for Linux target
 -------------------------
 
 ``` shell
-$ cd $GOPATH/github.com/adhocteam.us/appconf
+$ cd $GOPATH/github.com/adhocteam/appconf
 $ make rpm
 $ scp appconf-1.0-1.x86_64.rpm server:
 ```
