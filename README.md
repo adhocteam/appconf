@@ -3,10 +3,10 @@ appconf
 
 Application settings configurator.
 
-[https://appconf.adhocteam.us/](https://appconf.adhocteam.us/)
-
 This requires a S3 bucket to store the configuration files in, and to run as a
-AWS IAM user with permission to list, get, put, and delete objects on that bucket.
+AWS IAM user or role with permission to list, get, put, and delete objects on that bucket.
+
+It also requires an AWS KMS key, used to encrypt the configuration files at rest in the aforementioned S3 bucket. The KMS key must be configured to allow use by the IAM user or role for appconf.
 
 The S3 bucket structure is:
 
@@ -61,6 +61,7 @@ Runtime dependencies
 
 * **AWS credentials** -- add them to the shell environment
 * inventory.json file -- see [inventory.json.example](inventory.json.example) for a skeleton file
+* Environment var: `AWS_KMS_KEY_ID` -- the ID of the [AWS KMS](https://aws.amazon.com/kms/) key used to encrypt configuration variables stored in S3
 
 Installation
 ------------
@@ -73,10 +74,10 @@ Usage
 -----
 
 ``` shell
-$ cd $GOPATH/github.com/adhocteam/appconf -inv /path/to/inventory.json -bucket your-bucket-name -l :8080
+$ cd $GOPATH/src/github.com/adhocteam.us/appconf
 $ go install
 $ # ensure AWS credentials are set in the environment or $HOME/.aws/credentials
-$ $GOBIN/appconf
+$ $GOBIN/appconf -l :8081 -bucket s3-bucket-goes-here -inv inventory.json
 $ open http://localhost:8080/
 ```
 
@@ -84,7 +85,7 @@ Building for Linux target
 -------------------------
 
 ``` shell
-$ cd $GOPATH/github.com/adhocteam/appconf
+$ cd $GOPATH/src/github.com/adhocteam.us/appconf
 $ make rpm
 $ scp appconf-1.0-1.x86_64.rpm server:
 ```
