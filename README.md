@@ -53,7 +53,7 @@ the environment variables from these files. This mechanism is outside this app
 Build dependencies
 ------------------
 
-* **Go 1.5+**
+* **Go 1.8+**
 * **TypeScript 1.x** -- `npm install -g typescript`
 
 Runtime dependencies

@@ -25,7 +25,6 @@ var awsSess *session.Session
 
 type Inventory struct {
 	Applications map[string]app `json:"apps"`
-	Environments []env          `json:"envs"`
 }
 
 var inventory Inventory
@@ -33,14 +32,15 @@ var inventory Inventory
 type app struct {
 	Short  string `json:"shortname"`  // short name, like "marketplace-api"
 	Pretty string `json:"prettyname"` // pretty-print name, like "Marketplace API"
+	Envs   []env  `json:"envs"`       // list of the available envs for this app
 }
 
 func (i Inventory) appByName(name string) app {
 	return i.Applications[name]
 }
 
-func (i Inventory) envs() []env {
-	return i.Environments
+func (i Inventory) envs(name string) []env {
+	return i.Applications[name].Envs
 }
 
 type env string
@@ -75,7 +75,7 @@ func listEnvs(w http.ResponseWriter, r *http.Request) {
 		Envs []env `json:"envs"`
 	}{
 		inventory.appByName(r.FormValue(":app")),
-		inventory.envs(),
+		inventory.envs(r.FormValue(":app")),
 	}); err != nil {
 		log.Printf("encoding JSON: %v", err)
 		http.Error(w, http.StatusText(500), 500)
