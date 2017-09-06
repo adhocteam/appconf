@@ -6,7 +6,7 @@ Application settings configurator.
 This requires a S3 bucket to store the configuration files in, and to run as a
 AWS IAM user or role with permission to list, get, put, and delete objects on that bucket.
 
-It also requires an AWS KMS key, used to encrypt the configuration files at rest in the aforementioned S3 bucket. The KMS key must be configured to allow use by the IAM user or role for appconf.
+Optionally provide an AWS KMS key, used to encrypt the configuration files at rest in the aforementioned S3 bucket. The KMS key must be configured to allow use by the IAM user or role for appconf.
 
 The S3 bucket structure is:
 

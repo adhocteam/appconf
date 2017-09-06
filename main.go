@@ -177,12 +177,16 @@ func createVar(w http.ResponseWriter, r *http.Request) {
 	key := prefix + "/" + v.Name
 
 	params := &s3.PutObjectInput{
-		Bucket:               aws.String(bucket),
-		Key:                  aws.String(key),
-		Body:                 strings.NewReader(v.Val),
-		ServerSideEncryption: &encType,
-		SSEKMSKeyId:          &kmsKeyId,
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+		Body:   strings.NewReader(v.Val),
 	}
+
+	if kmsKeyId != "" {
+		params.ServerSideEncryption = &encType
+		params.SSEKMSKeyId = &kmsKeyId
+	}
+
 	resp, err := svc.PutObject(params)
 	if err != nil {
 		log.Printf("putting s3 object %s: %v", key, err)
@@ -215,12 +219,16 @@ func updateVar(w http.ResponseWriter, r *http.Request) {
 	key := prefix + "/" + v.Name
 
 	params := &s3.PutObjectInput{
-		Bucket:               aws.String(bucket),
-		Key:                  aws.String(key),
-		Body:                 strings.NewReader(v.Val),
-		ServerSideEncryption: &encType,
-		SSEKMSKeyId:          &kmsKeyId,
+		Bucket: aws.String(bucket),
+		Key:    aws.String(key),
+		Body:   strings.NewReader(v.Val),
 	}
+
+	if kmsKeyId != "" {
+		params.ServerSideEncryption = &encType
+		params.SSEKMSKeyId = &kmsKeyId
+	}
+
 	resp, err := svc.PutObject(params)
 	if err != nil {
 		log.Printf("putting s3 object %s: %v", key, err)
