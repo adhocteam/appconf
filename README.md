@@ -74,7 +74,7 @@ Usage
 -----
 
 ``` shell
-$ cd $GOPATH/src/github.com/adhocteam.us/appconf
+$ cd $GOPATH/src/github.com/adhocteam/appconf
 $ go install
 $ # ensure AWS credentials are set in the environment or $HOME/.aws/credentials
 $ $GOBIN/appconf -l :8081 -bucket s3-bucket-goes-here -inv inventory.json
