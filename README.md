@@ -6,7 +6,17 @@ Application settings configurator.
 This requires a S3 bucket to store the configuration files in, and to run as a
 AWS IAM user or role with permission to list, get, put, and delete objects on that bucket.
 
-Optionally provide an AWS KMS key, used to encrypt the configuration files at rest in the aforementioned S3 bucket. The KMS key must be configured to allow use by the IAM user or role for appconf.
+Optionally provide an AWS KMS key, used to encrypt the configuration files at rest in your S3 bucket. The KMS key must be configured to allow use by the IAM user or role for appconf.
+
+If a KMS key id is provided, you must enable S3's [signature version 4](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingAWSSDK.html#specify-signature-version).
+
+To enable signature version 4, edit your `~/.aws/config` file:
+
+```
+[default]
+s3 =
+    signature_version = s3v4
+```
 
 The S3 bucket structure is:
 
@@ -61,7 +71,8 @@ Runtime dependencies
 
 * **AWS credentials** -- add them to the shell environment
 * inventory.json file -- see [inventory.json.example](inventory.json.example) for a skeleton file
-* Environment var: `AWS_KMS_KEY_ID` -- the ID of the [AWS KMS](https://aws.amazon.com/kms/) key used to encrypt configuration variables stored in S3
+* The ID of the [AWS KMS](https://aws.amazon.com/kms/) key used to encrypt configuration variables stored in S3
+    - Read from the `AWS_KMS_KEY_ID` env var or provided using the `-k` flag
 
 Installation
 ------------
@@ -77,7 +88,7 @@ Usage
 $ cd $GOPATH/src/github.com/adhocteam/appconf
 $ go install
 $ # ensure AWS credentials are set in the environment or $HOME/.aws/credentials
-$ $GOBIN/appconf -l :8081 -bucket s3-bucket-goes-here -inv inventory.json
+$ $GOBIN/appconf -k kms-key-id-goes-here -l :8081 -bucket s3-bucket-goes-here -inv inventory.json
 $ open http://localhost:8080/
 ```
 

@@ -19,12 +19,11 @@ import (
 	"github.com/gorilla/handlers"
 )
 
-// for CLI flags
-var region, bucket, listenAddr, invPath string
-var awsSess *session.Session
-
 var encType string = "aws:kms"
-var kmsKeyId string = os.Getenv("AWS_KMS_KEY_ID")
+
+// for CLI flags
+var region, bucket, listenAddr, invPath, kmsKeyId string
+var awsSess *session.Session
 
 type Inventory struct {
 	Applications map[string]app `json:"apps"`
@@ -276,6 +275,7 @@ func init() {
 	flag.StringVar(&invPath, "inv", "inventory.json", "path to inventory file")
 	flag.StringVar(&bucket, "bucket", "", "S3 bucket")
 	flag.StringVar(&listenAddr, "l", ":8080", "address to listen on")
+	flag.StringVar(&kmsKeyId, "k", os.Getenv("AWS_KMS_KEY_ID"), "id of the kms key to use for server-side encryption")
 }
 
 func main() {
