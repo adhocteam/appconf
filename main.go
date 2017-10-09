@@ -19,8 +19,10 @@ import (
 	"github.com/gorilla/handlers"
 )
 
+var encType string = "aws:kms"
+
 // for CLI flags
-var region, bucket, listenAddr, invPath string
+var region, bucket, listenAddr, invPath, kmsKeyId string
 var awsSess *session.Session
 
 type Inventory struct {
@@ -178,6 +180,12 @@ func createVar(w http.ResponseWriter, r *http.Request) {
 		Key:    aws.String(key),
 		Body:   strings.NewReader(v.Val),
 	}
+
+	if kmsKeyId != "" {
+		params.ServerSideEncryption = &encType
+		params.SSEKMSKeyId = &kmsKeyId
+	}
+
 	resp, err := svc.PutObject(params)
 	if err != nil {
 		log.Printf("putting s3 object %s: %v", key, err)
@@ -214,6 +222,12 @@ func updateVar(w http.ResponseWriter, r *http.Request) {
 		Key:    aws.String(key),
 		Body:   strings.NewReader(v.Val),
 	}
+
+	if kmsKeyId != "" {
+		params.ServerSideEncryption = &encType
+		params.SSEKMSKeyId = &kmsKeyId
+	}
+
 	resp, err := svc.PutObject(params)
 	if err != nil {
 		log.Printf("putting s3 object %s: %v", key, err)
@@ -261,6 +275,7 @@ func init() {
 	flag.StringVar(&invPath, "inv", "inventory.json", "path to inventory file")
 	flag.StringVar(&bucket, "bucket", "", "S3 bucket")
 	flag.StringVar(&listenAddr, "l", ":8080", "address to listen on")
+	flag.StringVar(&kmsKeyId, "k", os.Getenv("AWS_KMS_KEY_ID"), "id of the kms key to use for server-side encryption")
 }
 
 func main() {

@@ -3,10 +3,20 @@ appconf
 
 Application settings configurator.
 
-[https://appconf.adhocteam.us/](https://appconf.adhocteam.us/)
-
 This requires a S3 bucket to store the configuration files in, and to run as a
-AWS IAM user with permission to list, get, put, and delete objects on that bucket.
+AWS IAM user or role with permission to list, get, put, and delete objects on that bucket.
+
+Optionally provide an AWS KMS key, used to encrypt the configuration files at rest in your S3 bucket. The KMS key must be configured to allow use by the IAM user or role for appconf.
+
+If a KMS key id is provided, you must enable S3's [signature version 4](http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingAWSSDK.html#specify-signature-version).
+
+To enable signature version 4, edit your `~/.aws/config` file:
+
+```
+[default]
+s3 =
+    signature_version = s3v4
+```
 
 The S3 bucket structure is:
 
@@ -61,6 +71,9 @@ Runtime dependencies
 
 * **AWS credentials** -- add them to the shell environment
 * inventory.json file -- see [inventory.json.example](inventory.json.example) for a skeleton file
+* The GUID of the [AWS KMS](https://aws.amazon.com/kms/) key used to encrypt configuration variables stored in S3
+    - This is the value after the `/` in the ARN for your KMS key: `arn:aws:kms:us-east-1:<account id>:key/<GUID>`
+    - Read from the `AWS_KMS_KEY_ID` env var or provided using the `-k` flag
 
 Installation
 ------------
@@ -73,10 +86,10 @@ Usage
 -----
 
 ``` shell
-$ cd $GOPATH/github.com/adhocteam/appconf -inv /path/to/inventory.json -bucket your-bucket-name -l :8080
+$ cd $GOPATH/src/github.com/adhocteam/appconf
 $ go install
 $ # ensure AWS credentials are set in the environment or $HOME/.aws/credentials
-$ $GOBIN/appconf
+$ $GOBIN/appconf -k kms-key-id-goes-here -l :8081 -bucket s3-bucket-goes-here -inv inventory.json
 $ open http://localhost:8080/
 ```
 
@@ -84,7 +97,7 @@ Building for Linux target
 -------------------------
 
 ``` shell
-$ cd $GOPATH/github.com/adhocteam/appconf
+$ cd $GOPATH/src/github.com/adhocteam/appconf
 $ make rpm
 $ scp appconf-1.0-1.x86_64.rpm server:
 ```
