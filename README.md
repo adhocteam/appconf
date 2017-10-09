@@ -71,7 +71,8 @@ Runtime dependencies
 
 * **AWS credentials** -- add them to the shell environment
 * inventory.json file -- see [inventory.json.example](inventory.json.example) for a skeleton file
-* The ID of the [AWS KMS](https://aws.amazon.com/kms/) key used to encrypt configuration variables stored in S3
+* The GUID of the [AWS KMS](https://aws.amazon.com/kms/) key used to encrypt configuration variables stored in S3
+    - This is the value after the `/` in the ARN for your KMS key: `arn:aws:kms:us-east-1:<account id>:key/<GUID>`
     - Read from the `AWS_KMS_KEY_ID` env var or provided using the `-k` flag
 
 Installation
