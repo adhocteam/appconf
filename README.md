@@ -96,7 +96,7 @@ Building for Linux target
 -------------------------
 
 ``` shell
-$ cd $GOPATH/src/github.com/adhocteam.us/appconf
+$ cd $GOPATH/src/github.com/adhocteam/appconf
 $ make rpm
 $ scp appconf-1.0-1.x86_64.rpm server:
 ```
