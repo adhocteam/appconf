@@ -6,6 +6,10 @@
     margin-bottom: 1em;
 }
 
+body {
+    padding-bottom: 100px;
+}
+
 /*
 .env-var.ng-enter {
     -webkit-transition: 0.5s linear all;
