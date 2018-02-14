@@ -71,9 +71,6 @@ Runtime dependencies
 
 * **AWS credentials** -- add them to the shell environment
 * inventory.json file -- see [inventory.json.example](inventory.json.example) for a skeleton file
-* The GUID of the [AWS KMS](https://aws.amazon.com/kms/) key used to encrypt configuration variables stored in S3
-    - This is the value after the `/` in the ARN for your KMS key: `arn:aws:kms:us-east-1:<account id>:key/<GUID>`
-    - Read from the `AWS_KMS_KEY_ID` env var or provided using the `-k` flag
 
 Installation
 ------------
@@ -89,7 +86,7 @@ Usage
 $ cd $GOPATH/src/github.com/adhocteam/appconf
 $ go install
 $ # ensure AWS credentials are set in the environment or $HOME/.aws/credentials
-$ $GOBIN/appconf -k kms-key-id-goes-here -l :8081 -bucket s3-bucket-goes-here -inv inventory.json
+$ $GOBIN/appconf -l :8081 -bucket s3-bucket-goes-here -inv inventory.json
 $ open http://localhost:8080/
 ```
 

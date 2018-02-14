@@ -8,8 +8,8 @@
 
   <h2>Environments</h2>
   <ul>
-    <li ng-repeat="env in envs">
-      <a href="#/{{app.shortname}}/{{env}}">{{env}}</a>
+    <li ng-repeat="(key, value) in envs">
+      <a href="#/{{app.shortname}}/{{key}}">{{key}}</a>
     </li>
   </ul>
 </div>

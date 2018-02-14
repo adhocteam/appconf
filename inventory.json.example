@@ -3,7 +3,17 @@
     "example": {
       "shortname": "example",
       "prettyname": "Example Application",
-      "envs": ["dev", "test", "prod"]
+      "envs": {
+        "dev": {
+          "kmskey": "KMS GUID or blank"
+        },
+        "test": {
+          "kmskey": "KMS GUID or blank"
+        },
+        "prod": {
+          "kmskey": "KMS GUID or blank"
+        }
+      }
     }
   }
 }
