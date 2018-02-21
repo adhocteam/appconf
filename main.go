@@ -22,7 +22,7 @@ import (
 var encType string = "aws:kms"
 
 // for CLI flags
-var region, bucket, listenAddr, invPath, kmsKeyId string
+var region, bucket, listenAddr, invPath string
 var awsSess *session.Session
 
 type Inventory struct {
@@ -32,20 +32,22 @@ type Inventory struct {
 var inventory Inventory
 
 type app struct {
-	Short  string `json:"shortname"`  // short name, like "marketplace-api"
-	Pretty string `json:"prettyname"` // pretty-print name, like "Marketplace API"
-	Envs   []env  `json:"envs"`       // list of the available envs for this app
+	Short  string 				`json:"shortname"`  // short name, like "marketplace-api"
+	Pretty string 				`json:"prettyname"` // pretty-print name, like "Marketplace API"
+	Envs   map[string]env `json:"envs"`       // list of the available envs for this app
 }
 
 func (i Inventory) appByName(name string) app {
 	return i.Applications[name]
 }
 
-func (i Inventory) envs(name string) []env {
+func (i Inventory) envs(name string) map[string]env {
 	return i.Applications[name].Envs
 }
 
-type env string
+type env struct {
+  KMSKey  string `json:"kmskey"` // KMS GUID
+}
 
 type cfgvar struct {
 	Name string `json:"name"`
@@ -74,7 +76,7 @@ func listApps(w http.ResponseWriter, r *http.Request) {
 func listEnvs(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(struct {
 		App  app   `json:"app"`
-		Envs []env `json:"envs"`
+		Envs map[string]env `json:"envs"`
 	}{
 		inventory.appByName(r.FormValue(":app")),
 		inventory.envs(r.FormValue(":app")),
@@ -98,7 +100,7 @@ func varNameFromS3Key(key string) string {
 
 func listVars(w http.ResponseWriter, r *http.Request) {
 	a := inventory.appByName(r.FormValue(":app"))
-	e := env(r.FormValue(":env"))
+	e := r.FormValue(":env")
 
 	svc := s3.New(awsSess)
 	prefix := a.Short + "/" + string(e) + "/"
@@ -144,7 +146,7 @@ func listVars(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(struct {
 		App  app      `json:"app"`
-		Env  env      `json:"env"`
+		Env  string   `json:"env"`
 		Vars []cfgvar `json:"vars"`
 	}{
 		a,
@@ -160,7 +162,7 @@ var envVarNameRE = regexp.MustCompile(`^[a-zA-Z_][a-zA-Z_0-9]*`)
 
 func createVar(w http.ResponseWriter, r *http.Request) {
 	a := inventory.appByName(r.FormValue(":app"))
-	e := env(r.FormValue(":env"))
+	e := r.FormValue(":env")
 
 	svc := s3.New(awsSess)
 	prefix := a.Short + "/" + string(e)
@@ -181,6 +183,7 @@ func createVar(w http.ResponseWriter, r *http.Request) {
 		Body:   strings.NewReader(v.Val),
 	}
 
+	kmsKeyId := a.Envs[e].KMSKey
 	if kmsKeyId != "" {
 		params.ServerSideEncryption = &encType
 		params.SSEKMSKeyId = &kmsKeyId
@@ -200,7 +203,7 @@ func createVar(w http.ResponseWriter, r *http.Request) {
 
 func updateVar(w http.ResponseWriter, r *http.Request) {
 	a := inventory.appByName(r.FormValue(":app"))
-	e := env(r.FormValue(":env"))
+	e := r.FormValue(":env")
 
 	svc := s3.New(awsSess)
 	prefix := a.Short + "/" + string(e)
@@ -223,6 +226,7 @@ func updateVar(w http.ResponseWriter, r *http.Request) {
 		Body:   strings.NewReader(v.Val),
 	}
 
+	kmsKeyId := a.Envs[e].KMSKey
 	if kmsKeyId != "" {
 		params.ServerSideEncryption = &encType
 		params.SSEKMSKeyId = &kmsKeyId
@@ -240,7 +244,7 @@ func updateVar(w http.ResponseWriter, r *http.Request) {
 
 func deleteVar(w http.ResponseWriter, r *http.Request) {
 	a := inventory.appByName(r.FormValue(":app"))
-	e := env(r.FormValue(":env"))
+	e := r.FormValue(":env")
 
 	svc := s3.New(awsSess)
 	prefix := a.Short + "/" + string(e)
@@ -275,7 +279,6 @@ func init() {
 	flag.StringVar(&invPath, "inv", "inventory.json", "path to inventory file")
 	flag.StringVar(&bucket, "bucket", "", "S3 bucket")
 	flag.StringVar(&listenAddr, "l", ":8080", "address to listen on")
-	flag.StringVar(&kmsKeyId, "k", os.Getenv("AWS_KMS_KEY_ID"), "id of the kms key to use for server-side encryption")
 }
 
 func main() {
