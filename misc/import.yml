@@ -29,7 +29,7 @@
       register: env_file
 
     - debug:
-        msg: "name={{ item.split('=')[0] | urlencode }}&val={{ item.split('=')[1] | urlencode }}"
+        msg: "name={{ item.split('=', 1)[0] | urlencode }}&val={{ item.split('=', 1)[1] | urlencode }}"
       with_items: "{{ env_file.stdout_lines }}"
 
     - name: POST the variable to Appconf
@@ -37,7 +37,7 @@
         module: uri
         url: ELB_ADDRESS/a/{{ service }}/{{ env }}
         method: POST
-        body: "name={{ item.split('=')[0] | urlencode }}&val={{ item.split('=')[1] | urlencode }}"
+        body: "name={{ item.split('=', 1)[0] | urlencode }}&val={{ item.split('=', 1)[1] | urlencode }}"
         return_content: yes
         validate_certs: no
         user: APPCONF_USERNAME
