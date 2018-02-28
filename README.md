@@ -84,6 +84,7 @@ Usage
 
 ``` shell
 $ cd $GOPATH/src/github.com/adhocteam/appconf
+$ make app.js
 $ go install
 $ # ensure AWS credentials are set in the environment or $HOME/.aws/credentials
 $ $GOBIN/appconf -l :8081 -bucket s3-bucket-goes-here -inv inventory.json
@@ -98,3 +99,83 @@ $ cd $GOPATH/src/github.com/adhocteam/appconf
 $ make rpm
 $ scp appconf-1.0-1.x86_64.rpm server:
 ```
+
+### IAM Policy Examples
+
+#### Appconf Server
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket"
+            ],
+            "Resource": "arn:aws:s3:::s3-bucket-goes-here"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arn:aws:s3:::s3-bucket-goes-here/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": "kms:GenerateDataKey",
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt"
+            ],
+            "Resource": [
+                "every KMS ARN for each application"
+            ]
+        }
+    ]
+}
+```
+
+#### Application Server
+
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": "arn:aws:s3:::s3-bucket-goes-here/application/environment/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt"
+            ],
+            "Resource": "KMS ARN for the application"
+        }
+    ]
+}
+```
+
+### Extras
+
+#### Example init script to pull configuration for an application
+
+An example init script is included in misc/app_init.sh; it's rough, but might help you get started.
+
+#### Import Helper
+
+An example Ansible script to help import a bunch of ENV files is included in misc/import.yml. You may use this to help import lots of variables across many services quickly.
+
+#### Packer build and Ansible playbooks
+
+The QPPFE build source for building an Appconf AMI is available on github, if you have access: https://github.com/CMSgov/qpp-deploy/tree/master/packer
