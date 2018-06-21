@@ -32,8 +32,8 @@ type Inventory struct {
 var inventory Inventory
 
 type app struct {
-	Short  string 				`json:"shortname"`  // short name, like "marketplace-api"
-	Pretty string 				`json:"prettyname"` // pretty-print name, like "Marketplace API"
+	Short  string         `json:"shortname"`  // short name, like "marketplace-api"
+	Pretty string         `json:"prettyname"` // pretty-print name, like "Marketplace API"
 	Envs   map[string]env `json:"envs"`       // list of the available envs for this app
 }
 
@@ -46,7 +46,7 @@ func (i Inventory) envs(name string) map[string]env {
 }
 
 type env struct {
-  KMSKey  string `json:"kmskey"` // KMS GUID
+	KMSKey string `json:"kmskey"` // KMS GUID
 }
 
 type cfgvar struct {
@@ -75,7 +75,7 @@ func listApps(w http.ResponseWriter, r *http.Request) {
 
 func listEnvs(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(struct {
-		App  app   `json:"app"`
+		App  app            `json:"app"`
 		Envs map[string]env `json:"envs"`
 	}{
 		inventory.appByName(r.FormValue(":app")),
