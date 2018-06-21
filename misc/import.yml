@@ -1,0 +1,54 @@
+---
+
+# Import to appconf from a .env file
+
+# How to use this playbook
+
+# Update the following things:
+# PATH_TO_ENV_FILE
+# ELB_ADDRESS
+# APPCONF_USERNAME
+# APPCONF_PASSWORD
+# Hosts/inventory
+#   For QPP, we use ec2.py: https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/ec2.py
+#   It's nice and easy to use, alternatively, change hosts and run as needed
+
+# Run this playbook:
+# ansible-playbook -e "service=ui" -e "env=dev" appconf_import.yml
+
+- name: Collect the .env
+  hosts: tag_Name_{{ service }}_{{ env }}
+  user: app
+  become: true
+  run_once: true
+
+  tasks:
+
+    - name: Collect the .env
+      command: cat PATH_TO_ENV_FILE
+      register: env_file
+
+    - debug:
+        msg: "name={{ item.split('=', 1)[0] | urlencode }}&val={{ item.split('=', 1)[1] | urlencode }}"
+      with_items: "{{ env_file.stdout_lines }}"
+
+    - name: POST the variable to Appconf
+      local_action:
+        module: uri
+        url: ELB_ADDRESS/a/{{ service }}/{{ env }}
+        method: POST
+        body: "name={{ item.split('=', 1)[0] | urlencode }}&val={{ item.split('=', 1)[1] | urlencode }}"
+        return_content: yes
+        validate_certs: no
+        user: APPCONF_USERNAME
+        password: APPCONF_PASSWORD
+        force_basic_auth: yes
+        headers:
+          Content-Type: "application/x-www-form-urlencoded"
+        status_code: 201
+      register: webpage
+      become: false
+      with_items: "{{ env_file.stdout_lines }}"
+
+    - debug:
+        var: webpage
