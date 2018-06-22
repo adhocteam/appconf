@@ -11,7 +11,7 @@
     <h2>Config vars</h2>
 
     <div class="spinner" ng-show="loading">Loading &hellip;</div>
-    
+
     <div ng-hide="loading" class="env">
       <div ng-repeat="v in vars" class="row env-var">
         <div class="config-var-name col-md-5">
@@ -51,7 +51,7 @@
         <div class="col-md-5">
           <input type="text" placeholder="NAME" class="form-control"
                  ng-model="newvar.name"
-                 ng-pattern="/^[a-zA-Z_][a-zA-Z0-9_]*$/"
+                 ng-pattern="/^[a-zA-Z_][a-zA-Z0-9_\-]*$/"
                  required>
         </div>
         <div class="col-md-5">
